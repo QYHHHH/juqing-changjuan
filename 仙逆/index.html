@@ -951,7 +951,10 @@ const Music=(()=>{
     ['sawtooth','sawtooth','sine','sine'].forEach((ty,i)=>{const o=ctx.createOscillator();o.type=ty;o.frequency.value=73;const g=ctx.createGain();g.gain.value=i<2?.5:1;o.connect(g);g.connect(lp);o.start();droneO.push(o)});lp.connect(droneG);out(droneG,0,.6);
     rumbleG=ctx.createGain();rumbleG.gain.value=0;const rn=ctx.createBufferSource();rn.buffer=noiseBuf;rn.loop=true;const rl=ctx.createBiquadFilter();rl.type='lowpass';rl.frequency.value=130;rn.connect(rl);rl.connect(rumbleG);rumbleG.connect(master);rn.start();
     nextT=ctx.currentTime+.2;setInterval(tick,80);setMood(Object.keys(M).find(k=>M[k]===mood)||'calm');applyVol();return true}
-  return{start,setMood,crack,swell,rise,get on(){return on},get state(){return ctx?ctx.state:'none'},toggle(){on=!on;applyVol()},resume(){applyVol()},setPlaying(p){if(p===playing)return;playing=p;applyVol()},setHidden(h){hidden=h;applyVol()}};
+  // 在用户手势里解锁：播一段静音并立即 resume（iOS 只认 touchend/click 里的调用）
+  function unlock(){if(!ctx)return;try{const s=ctx.createBufferSource();s.buffer=ctx.createBuffer(1,1,ctx.sampleRate);s.connect(ctx.destination);s.start(0)}catch(e){}
+    if(ctx.state!=='running')ctx.resume().then(applyVol,()=>{});applyVol()}
+  return{start,setMood,crack,swell,rise,unlock,onState(cb){if(ctx)ctx.addEventListener('statechange',cb)},get on(){return on},get state(){return ctx?ctx.state:'none'},toggle(){on=!on;applyVol()},resume(){applyVol()},setPlaying(p){if(p===playing)return;playing=p;applyVol()},setHidden(h){hidden=h;applyVol()}};
 })();
 if(GL)GL.onCrack=()=>Music.crack();
 let noteT;function note2(m){const n=$('#note');n.textContent=m;n.classList.add('show');clearTimeout(noteT);noteT=setTimeout(()=>n.classList.remove('show'),3000)}
@@ -1076,12 +1079,16 @@ addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0]
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(Timeline.auto)Timeline.pausedAt=performance.now()-Timeline.t0}else{if(Timeline.auto)Timeline.t0=performance.now()-(Timeline.pausedAt||0);last=performance.now()}Music.setHidden(document.hidden)});
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>GL&&GL.resize(),120)});
 
-function audioHint(){const n=$('#note');n.textContent='轻触屏幕开启配乐';n.classList.add('show');const ev=['pointerdown','keydown','touchstart'];
-  const go=()=>{Music.resume();n.classList.remove('show');ev.forEach(t=>removeEventListener(t,go,true))};ev.forEach(t=>addEventListener(t,go,true))}
+// 声音被浏览器拦住时：每次触屏/点击都尝试解锁，直到真正出声为止
+const UNLOCK_EV=['touchend','click','pointerup','keydown'];
+function tryUnlock(){if(Music.state!=='running')Music.unlock()}
+function audioHint(){if(Music.state==='running'||Music.state==='none')return;const n=$('#note');n.textContent='轻触屏幕开启配乐';n.classList.add('show')}
+function audioOk(){if(Music.state!=='running')return;$('#note').classList.remove('show');UNLOCK_EV.forEach(t=>removeEventListener(t,tryUnlock,true))}
 $('#app').classList.remove('pre');
 if(!Music.start())note2('当前浏览器不支持音频');
+else{UNLOCK_EV.forEach(t=>addEventListener(t,tryUnlock,true));Music.onState(audioOk)}
 Timeline.auto=true;Timeline.go(0);
-setTimeout(()=>{if(Music.state==='suspended')audioHint()},700);
+setTimeout(audioHint,700);
 requestAnimationFrame(loop);
 })();
 </script>
