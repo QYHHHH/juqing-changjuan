@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06060a">
+<meta name="description" content="动画剧情 3D 时间线，选择一部作品，进入它的剧情世界。">
+<title>剧情长卷</title>
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<style>
+/* Layout: centered title over a poster wall; posters are 2:3 cards that lift on hover. Single dark look by design. */
+:root{
+  color-scheme:dark;
+  --bg:#06060a; --fg:#f3ece0; --fg2:rgba(243,236,224,.64); --fg3:rgba(243,236,224,.36); --gold:#e6c470; --line:rgba(255,255,255,.1);
+  --brush:"Ma Shan Zheng","STKaiti","KaiTi","Kaiti SC",serif;
+  --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.glow{position:fixed;inset:0;z-index:-2;background:radial-gradient(1100px 560px at 72% -12%,rgba(230,196,112,.16),transparent 62%),radial-gradient(900px 520px at 8% 112%,rgba(110,90,190,.14),transparent 60%),var(--bg)}
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+main{max-width:1080px;margin:0 auto;padding:calc(clamp(44px,10vh,104px) + env(safe-area-inset-top,0px)) 20px calc(40px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:clamp(30px,6vh,60px)}
+header{text-align:center;animation:rise 1.4s cubic-bezier(.2,.7,.2,1) both}
+.kicker{font-size:12px;letter-spacing:.6em;padding-left:.6em;color:var(--gold)}
+h1{font-family:var(--brush);font-weight:400;font-size:clamp(64px,12vw,132px);line-height:1.08;letter-spacing:.12em;padding-left:.12em;margin:12px 0 10px;background:linear-gradient(180deg,#fff 18%,#dcc58c 72%,#7a6430);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 32px rgba(230,196,112,.28))}
+.lead{font-size:14px;letter-spacing:.32em;padding-left:.32em;color:var(--fg2)}
+.wall{display:grid;grid-template-columns:repeat(2,minmax(0,280px));justify-content:center;gap:clamp(14px,3.4vw,36px);width:100%}
+.poster{position:relative;display:block;aspect-ratio:2/3;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:#0c0c12;color:inherit;text-decoration:none;isolation:isolate;
+  box-shadow:0 24px 50px -24px rgba(0,0,0,.9);transition:transform .6s cubic-bezier(.2,.7,.2,1),box-shadow .6s,border-color .6s;animation:rise 1.2s cubic-bezier(.2,.7,.2,1) both}
+.poster:nth-child(2){animation-delay:.12s}
+.poster .art{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform 1.4s cubic-bezier(.2,.7,.2,1)}
+.poster .art svg{width:100%;height:100%;display:block}
+.poster::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.86) 100%)}
+.poster .t{position:absolute;top:18px;right:14px;z-index:2;writing-mode:vertical-rl;font-family:var(--brush);font-size:clamp(42px,7vw,66px);line-height:1;letter-spacing:.14em;
+  background:linear-gradient(180deg,#fff 30%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 14px rgba(0,0,0,.75))}
+.poster .t.long{font-size:clamp(30px,5vw,46px)}
+.poster .info{position:absolute;left:16px;right:16px;bottom:16px;z-index:2}
+.poster .by{font-size:11px;letter-spacing:.32em;color:var(--gold)}
+.poster .tags{margin-top:6px;font-size:12px;line-height:1.75;letter-spacing:.12em;color:var(--fg2)}
+.poster .go{margin-top:12px;display:inline-flex;align-items:center;gap:8px;padding:6px 15px;border:1px solid rgba(230,196,112,.6);border-radius:99px;font-size:12px;letter-spacing:.3em;color:#fff;background:rgba(0,0,0,.35);transition:background .4s,box-shadow .4s}
+a.poster:hover,a.poster:focus-visible{transform:translateY(-8px);border-color:rgba(230,196,112,.7);box-shadow:0 34px 60px -24px rgba(0,0,0,.95),0 0 44px -12px rgba(230,196,112,.55)}
+a.poster:hover .art,a.poster:focus-visible .art{transform:scale(1.06)}
+a.poster:hover .go{background:rgba(230,196,112,.22);box-shadow:0 0 18px -4px rgba(230,196,112,.7)}
+a.poster:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+.poster.soon{cursor:default}
+.poster.soon .art,.poster.soon .t,.poster.soon .info{filter:grayscale(1);opacity:.45}
+.poster .badge{position:absolute;top:16px;left:14px;z-index:2;padding:4px 11px;border:1px solid rgba(255,255,255,.32);border-radius:99px;font-size:11px;letter-spacing:.3em;color:var(--fg2);background:rgba(0,0,0,.45)}
+footer{font-size:11px;line-height:1.9;letter-spacing:.2em;color:var(--fg3);text-align:center}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@media (max-width:520px){.wall{grid-template-columns:repeat(2,minmax(0,1fr))}.poster .info{left:12px;right:12px;bottom:12px}.poster .tags{font-size:10.5px;letter-spacing:.02em}.poster .tags .sub{display:none}.poster .go{padding:5px 12px}}
+@media (prefers-reduced-motion:reduce){header,.poster{animation:none}.poster,.poster .art{transition:none}}
+</style>
+</head>
+<body>
+<div class="glow" aria-hidden="true"></div>
+<canvas id="stars" aria-hidden="true"></canvas>
+<main>
+  <header>
+    <p class="kicker">动画剧情 · 3D 时间线</p>
+    <h1>剧情长卷</h1>
+    <p class="lead">选择一部作品，进入它的剧情世界</p>
+  </header>
+  <section class="wall" aria-label="作品">
+    <a class="poster" href="%E4%BB%99%E9%80%86/">
+      <div class="art" style="background-image:url('assets/xianni.jpg')"></div>
+      <div class="t">仙逆</div>
+      <div class="info">
+        <p class="by">耳根 · 著</p>
+        <p class="tags">动画 · 剧场版 · 原著后传<span class="sub"><br>从赵国山村到踏天之路</span></p>
+        <span class="go">进入 ›</span>
+      </div>
+    </a>
+    <div class="poster soon" aria-disabled="true">
+      <div class="art">
+        <svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="fr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1719"/><stop offset=".55" stop-color="#2a5654"/><stop offset="1" stop-color="#93bba9"/></linearGradient></defs>
+          <rect width="200" height="300" fill="url(#fr)"/>
+          <circle cx="62" cy="92" r="17" fill="#eaf3ec" opacity=".85"/>
+          <path d="M0 196 L26 150 L50 178 L82 112 L112 168 L148 126 L200 186 V300 H0Z" fill="#183836"/>
+          <path d="M0 236 L38 198 L80 228 L122 186 L162 222 L200 202 V300 H0Z" fill="#0d2120"/>
+          <path d="M0 270 L52 248 L100 266 L152 246 L200 260 V300 H0Z" fill="#050d0c"/>
+        </svg>
+      </div>
+      <span class="badge">敬请期待</span>
+      <div class="t long">凡人修仙传</div>
+      <div class="info">
+        <p class="by">忘语 · 著</p>
+        <p class="tags">即将上线</p>
+      </div>
+    </div>
+  </section>
+  <footer>剧情梳理，非官方作品 · 版权归原作者及出品方所有</footer>
+</main>
+<script>
+(()=>{
+  const c=document.getElementById('stars'),g=c.getContext('2d');
+  let seed=7;const r=()=>(seed=seed*16807%2147483647)/2147483647;
+  function draw(){
+    const d=Math.min(window.devicePixelRatio||1,2),w=innerWidth,h=innerHeight;
+    c.width=w*d;c.height=h*d;g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,w,h);seed=7;
+    const n=Math.round(w*h/5200);
+    for(let i=0;i<n;i++){const x=r()*w,y=r()*h,s=r()*1.3+.2,a=.15+r()*.55;g.fillStyle=`rgba(235,240,255,${a})`;g.fillRect(x,y,s,s)}
+  }
+  draw();let t;addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(draw,150)});
+})();
+</script>
+</body>
+</html>
