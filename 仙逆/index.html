@@ -167,20 +167,8 @@ h1.ti.long{font-size:clamp(40px,6.2vw,96px)}
 #note{position:absolute;left:50%;top:calc(var(--bt) + 14px);transform:translate(-50%,-6px);z-index:40;background:rgba(0,0,0,.85);border:1px solid rgba(255,255,255,.14);border-radius:99px;padding:7px 16px;font-size:12px;letter-spacing:.12em;opacity:0;transition:.4s;pointer-events:none;max-width:calc(100vw - 32px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #note.show{opacity:1;transform:translate(-50%,0)}
 
-/* splash */
-#splash{position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 16px;background:radial-gradient(ellipse at 50% 55%,rgba(5,6,16,.15),rgba(0,0,0,.8));transition:opacity 1.4s ease,visibility 1.4s}
-#splash.gone{opacity:0;visibility:hidden;pointer-events:none}
 .bar,.rail,.map,#cards,#content{transition:opacity 1.6s ease}
 #app.pre .bar,#app.pre .rail,#app.pre .map,#app.pre #cards,#app.pre #content{opacity:0}
-#splash .q{font-family:var(--brush);font-size:clamp(16px,2.2vh,22px);letter-spacing:.4em;padding-left:.4em;color:var(--gold);margin-bottom:14px;opacity:0;animation:rise 1.6s .3s forwards}
-#splash .q cite{display:block;font-family:var(--serif);font-style:normal;font-size:10.5px;letter-spacing:.3em;color:var(--fg3);margin-top:6px}
-#splash h2{font-family:var(--brush);font-weight:400;font-size:clamp(90px,19vw,250px);line-height:1;letter-spacing:.14em;padding-left:.14em;background:linear-gradient(180deg,#fff 20%,#d9c28a 70%,#6c5a2c);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 40px rgba(230,196,112,.35));opacity:0;animation:rise 2.2s .6s forwards}
-#splash .s{margin:12px 0 34px;font-size:clamp(12px,1.7vh,15px);letter-spacing:.36em;padding-left:.36em;line-height:2;color:var(--fg2);opacity:0;animation:rise 1.6s 1.4s forwards;text-wrap:balance}
-#splash .bt{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;opacity:0;animation:rise 1.4s 2s forwards}
-.cta{height:50px;padding:0 34px;border:1px solid var(--gold);color:#fff;letter-spacing:.4em;font-size:14px;border-radius:2px;background:linear-gradient(120deg,rgba(230,196,112,.22),rgba(230,196,112,.04));transition:.3s}
-.cta:hover{box-shadow:0 0 30px -4px var(--gold);background:linear-gradient(120deg,rgba(230,196,112,.4),rgba(230,196,112,.1))}
-.cta.alt{border-color:rgba(255,255,255,.3);background:none;color:var(--fg2)}
-#splash .n{position:absolute;bottom:calc(3.5vh + env(safe-area-inset-bottom,0px));font-size:11px;letter-spacing:.2em;color:var(--fg3);line-height:1.9;padding:0 16px;opacity:0;animation:rise 1.4s 2.6s forwards}
 
 @media(max-width:1100px){.hint{display:none}}
 @media(max-width:820px){
@@ -242,16 +230,6 @@ h1.ti.long{font-size:clamp(40px,6.2vw,96px)}
     <div class="tl" id="tl"><div class="tl-in" id="tlIn"><div class="arcs" id="arcs"></div><div class="track"><div class="fill" id="fill"></div></div></div></div>
   </footer>
 
-  <section id="splash">
-    <p class="q">顺为凡，逆则仙，只在心中一念间<cite>— 耳根《仙逆》</cite></p>
-    <h2>仙逆</h2>
-    <p class="s">从赵国山村到踏天之路<br>动画 · 剧场版《神临之战》《弑仙之战》 · 原著后传</p>
-    <div class="bt">
-      <button class="cta" id="goAuto" type="button">入境 · 电影模式</button>
-      <button class="cta alt" id="goManual" type="button">入境 · 手动浏览</button>
-    </div>
-    <p class="n">原著 耳根　·　动画 铸梦动画 × 腾讯视频　·　进入后开始配乐（建议佩戴耳机）</p>
-  </section>
 </div>
 
 <script src="vendor/three/three.min.js"></script>
@@ -467,7 +445,6 @@ const ENV={
  tomb:env({sky:['#0a0302','#2a0a06','#6a1e0c'],fog:'#3a1208',fogD:.0032,sun:{t:0,c:'#ff8a40',d:[.06,.2,-1],s:.03,g:.7},amb:'#5a2a14',low:'#060202',high:'#1e0a06',rim:'#ffa060',mist:'#6a1e0c',mistH:-16,mistA:.6,terrain:'canyon',ceiling:true,parts:{m:'rise',c:'#ffa050',s:2,v:1.4,n:.7},props:['seal'],hero:{rim:'#ffb070'},cam:{from:[-4,3.4,25],to:[-3,3,19],look:[-6,9,-90]},bloom:1}),
  scroll:env({sky:['#140a1a','#4a2a5a','#e0b878'],fog:'#8a6a58',fogD:.0024,sun:{t:1,c:'#fff0c8',d:[.06,.14,-1],s:.03,g:.8},amb:'#8a6a7a',low:'#100810',high:'#3a2a3a',rim:'#ffe0a8',mist:'#e0b878',mistH:-12,mistA:.6,terrain:'peaks',clouds:{y:-10,c:'#e8c898',n:.7,o:.4},parts:{m:'float',c:'#ffe8b8',s:2,v:.4,n:.4},props:['pagodas'],hero:{rim:'#ffe6b8'},bloom:.8}),
  intro:env({sky:['#05040c','#2a1a3a','#e8a860'],fog:'#6a4a50',fogD:.0019,sun:{t:1,c:'#ffe0b0',d:[.3,.035,-1],s:.024,g:.55},amb:'#6a5070',low:'#08060c',high:'#2a2034',rim:'#ffd8a0',mistA:0,clouds:{y:-14,c:'#d8a888',n:1,o:.45,spread:8,size:1.3},parts:{m:'rise',c:'#ffd890',s:2.2,v:1.4,n:.8},props:['islands','bigglyph'],hero:{rim:'#ffdca8',rock:'float'},cam:{from:[-16,13,66],to:[-5,3.4,24],look:[-8,11,-80]},bloom:.9}),
- splash:env({sky:['#02030a','#090b22','#1c1244'],fog:'#0a0c24',fogD:.0009,sun:{t:1,c:'#c3d6ff',d:[.12,.2,-1],s:.01,g:.6},neb:['#3a3ac0','#2a96c8',.9],stars:1,parts:{m:'float',c:'#aac8ff',s:1.8,v:.3,n:.3},props:['planetBlue','asteroids'],hero:{rim:'#b0c8ff',rock:'float'},cam:{from:[-6,3.8,28],to:[-5,3.4,23]},bloom:.9}),
 };
 
 /* ====================== 3D 引擎 ====================== */
@@ -921,7 +898,7 @@ const Music=(()=>{
     ['sawtooth','sawtooth','sine','sine'].forEach((ty,i)=>{const o=ctx.createOscillator();o.type=ty;o.frequency.value=73;const g=ctx.createGain();g.gain.value=i<2?.5:1;o.connect(g);g.connect(lp);o.start();droneO.push(o)});lp.connect(droneG);out(droneG,0,.6);
     rumbleG=ctx.createGain();rumbleG.gain.value=0;const rn=ctx.createBufferSource();rn.buffer=noiseBuf;rn.loop=true;const rl=ctx.createBiquadFilter();rl.type='lowpass';rl.frequency.value=130;rn.connect(rl);rl.connect(rumbleG);rumbleG.connect(master);rn.start();
     nextT=ctx.currentTime+.2;setInterval(tick,80);setMood(Object.keys(M).find(k=>M[k]===mood)||'calm');applyVol();return true}
-  return{start,setMood,crack,swell,rise,get on(){return on},toggle(){on=!on;applyVol()},resume(){applyVol()},setPlaying(p){if(p===playing)return;playing=p;applyVol()},setHidden(h){hidden=h;applyVol()}};
+  return{start,setMood,crack,swell,rise,get on(){return on},get state(){return ctx?ctx.state:'none'},toggle(){on=!on;applyVol()},resume(){applyVol()},setPlaying(p){if(p===playing)return;playing=p;applyVol()},setHidden(h){hidden=h;applyVol()}};
 })();
 if(GL)GL.onCrack=()=>Music.crack();
 let noteT;function note2(m){const n=$('#note');n.textContent=m;n.classList.add('show');clearTimeout(noteT);noteT=setTimeout(()=>n.classList.remove('show'),3000)}
@@ -1024,9 +1001,6 @@ const Timeline={
 /* ====================== 主循环与控制 ====================== */
 let last=performance.now();
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(GL){GL.update(dt);GL.render();GL.adapt(dt)}Timeline.tick(now);requestAnimationFrame(loop)}
-function enter(auto){$('#splash').classList.add('gone');$('#app').classList.remove('pre');if(!Music.start())note2('当前浏览器不支持音频');Music.resume();Timeline.auto=auto;Timeline.go(0)}
-$('#goAuto').onclick=()=>enter(true);
-$('#goManual').onclick=()=>enter(false);
 $('#bPrev').onclick=()=>{Timeline.prev();Music.resume()};
 $('#bNext').onclick=()=>{Timeline.next();Music.resume()};
 $('#bPlay').onclick=()=>{const c=NODES[Timeline.idx];Music.resume();if(c.end){Timeline.auto=true;Timeline.go(0)}else Timeline.toggle()};
@@ -1034,7 +1008,6 @@ $('#bMusic').onclick=()=>{Music.start();Music.resume();Music.toggle()};
 $('#bFull').onclick=fs;
 function fs(){try{if(document.fullscreenElement)document.exitFullscreen();else{const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(!r)note2('当前环境不支持全屏');else r.catch(()=>note2('当前环境不支持全屏'))}}catch(e){note2('当前环境不支持全屏')}}
 addEventListener('keydown',e=>{
-  if(!$('#splash').classList.contains('gone')){if(e.key==='Enter')enter(true);return}
   if(e.key==='ArrowRight'||e.key==='PageDown')Timeline.next();
   else if(e.key==='ArrowLeft'||e.key==='PageUp')Timeline.prev();
   else if(e.key===' '){e.preventDefault();$('#bPlay').click()}
@@ -1043,11 +1016,16 @@ addEventListener('keydown',e=>{
   else if(e.key==='Home')Timeline.go(0);else if(e.key==='End')Timeline.go(N-1);
 });
 let tx=null;addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
-addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;tx=null;if(!$('#splash').classList.contains('gone'))return;if(Math.abs(dx)>60&&!e.target.closest('.tl,#cards,.bar'))dx<0?Timeline.next():Timeline.prev()},{passive:true});
+addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;tx=null;if(Math.abs(dx)>60&&!e.target.closest('.tl,#cards,.bar'))dx<0?Timeline.next():Timeline.prev()},{passive:true});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(Timeline.auto)Timeline.pausedAt=performance.now()-Timeline.t0}else{if(Timeline.auto)Timeline.t0=performance.now()-(Timeline.pausedAt||0);last=performance.now()}Music.setHidden(document.hidden)});
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>GL&&GL.resize(),120)});
 
-if(GL)GL.go('splash',{instant:true});else $('#stage').style.background='linear-gradient(180deg,#02030a,#090b22 55%,#1c1244)';
+function audioHint(){const n=$('#note');n.textContent='轻触屏幕开启配乐';n.classList.add('show');const ev=['pointerdown','keydown','touchstart'];
+  const go=()=>{Music.resume();n.classList.remove('show');ev.forEach(t=>removeEventListener(t,go,true))};ev.forEach(t=>addEventListener(t,go,true))}
+$('#app').classList.remove('pre');
+if(!Music.start())note2('当前浏览器不支持音频');
+Timeline.auto=true;Timeline.go(0);
+setTimeout(()=>{if(Music.state==='suspended')audioHint()},700);
 requestAnimationFrame(loop);
 })();
 </script>
