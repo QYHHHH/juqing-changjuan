@@ -199,6 +199,26 @@ h1.ti.long{font-size:clamp(40px,6.2vw,96px)}
   .rl.foe::after{font-size:7.5px;line-height:10px;padding:0 2px}
   #content{left:62px}
 }
+/* 竖屏版式 */
+@media(orientation:portrait){
+  .rec{--sl:6vw;--sr:18vw;--su:6vw;--st:12vh;--sb:10vh;--tlh:66px}
+  .rec .bar.top{top:var(--st);height:var(--bt);padding:0 var(--su) 0 var(--sl);background:none}
+  .rec .bar.top .ctl{display:none}
+  .rec .bar.bottom{bottom:0;left:var(--sl);right:var(--sr);height:calc(var(--sb) + var(--tlh));padding:0;flex-direction:column-reverse;justify-content:flex-start;background:none}
+  .rec .row1{flex:none;height:var(--sb)}
+  .rec .tl{flex:none;height:var(--tlh);margin-top:0}
+  .rec .rail{left:var(--sl);top:calc(var(--st) + var(--bt) + 3vh);bottom:calc(var(--sb) + var(--tlh) + 3vh)}
+  .rec #content{top:calc(var(--st) + var(--bt));bottom:calc(var(--sb) + var(--tlh))}
+  .rec #cards{right:var(--sr);top:calc(var(--st) + var(--bt) + 4vh);max-height:calc(100% - var(--st) - var(--bt) - var(--sb) - var(--tlh) - 8vh - 200px)}
+  .rec .map{right:var(--sr);bottom:calc(var(--sb) + var(--tlh) + 2.2vh)}
+  .rec #toast{left:50vw}
+  .rec #card{left:44vw;width:76vw}
+}
+@media(orientation:portrait) and (max-width:820px){
+  .rec .rail{top:calc(var(--st) + var(--bt) + 6px);bottom:calc(var(--sb) + var(--tlh) + 66px)}
+  .rec #content{left:calc(var(--sl) + 56px);right:var(--sr);top:var(--st);bottom:calc(var(--sb) + var(--tlh) + 62px)}
+  .rec #cards{left:var(--sl);right:var(--sr);top:auto;bottom:calc(var(--sb) + var(--tlh) + 6px);max-height:none}
+}
 @media(prefers-reduced-motion:reduce){.ln,.card,.ping{animation-duration:.01s!important;animation-delay:0s!important}}
 </style>
 
@@ -257,6 +277,31 @@ h1.ti.long{font-size:clamp(40px,6.2vw,96px)}
 const $=s=>document.querySelector(s);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const SPEED=1.2;
+const REC=new URLSearchParams(location.search).has('rec');
+if(REC)document.documentElement.classList.add('rec');
+const RZ=1.2;
+function fitPanel(p){
+  p.style.zoom='';if(!REC||innerWidth>innerHeight)return; // 只在竖屏生效
+  const ks=[...p.children].filter(e=>getComputedStyle(e).position!=='absolute'&&getComputedStyle(e).display!=='none');if(!ks.length)return;
+  const rows=[...ks.filter(e=>!e.classList.contains('txt')),...p.querySelectorAll('.txt p')];
+  // 只在手机竖屏布局下放大和放宽；电脑布局右边还有人物卡和地图
+  const mob=innerWidth<=820,ZM=mob?RZ:1;
+  const avail=$('#content').getBoundingClientRect().height,mid=innerHeight/2,ext=mob?innerWidth*.12:0;
+  const pb=parseFloat(getComputedStyle(p).paddingBottom)||0;
+  let up;
+  const fits=z=>{
+    up=e=>e.getBoundingClientRect().bottom-16*z<=mid; // .ln 入场前下移了 16px
+    p.style.zoom=z;rows.forEach(e=>e.style.marginRight='');
+    if(ext){
+      rows.forEach(e=>{if(up(e))e.style.marginRight=-ext/z+'px'});
+      for(let k=0;k<rows.length;k++){const bad=rows.find(e=>e.style.marginRight&&!up(e));if(!bad)break;bad.style.marginRight=''}
+    }
+    return ks[ks.length-1].getBoundingClientRect().bottom-ks[0].getBoundingClientRect().top<=avail-pb*z+1;
+  };
+  if(fits(ZM))return;
+  let lo=.4,hi=ZM;for(let k=0;k<9;k++){const m=(lo+hi)/2;if(fits(m))lo=m;else hi=m}
+  fits(lo);
+}
 const LOW=Math.min(innerWidth,innerHeight)<700||/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t;
 const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
@@ -289,9 +334,9 @@ const NODES=[
  {arc:1,title:'珠中残魂',short:'司徒南',map:'zhao',realm:1,env:'soul',mood:'mystic',accent:'#b9a4ff',kw:'狂',src:'动画正片',
   lines:['珠中沉睡的残魂醒来，自称司徒南。','狂傲不羁，却把修行与生存之道倾囊相授。','少年第一次看清修真界：弱肉强食，从无例外。'],
   chars:[C('司徒南','南','天逆珠中的残魂','亦师亦友，王林逆天之路上的引路人。')]},
- {arc:1,minor:true,title:'即墨追杀',short:'即墨追杀',map:'teng',realm:1,env:'city',shot:3,mood:'tense',accent:'#ff8a6a',kw:'追',src:'动画正片 · 约EP4–5',
-  lines:['斩杀白展，王林惹上了即墨老人。','追杀逼近，他被迫逃入藤家城。'],
-  chars:[C('即墨老人','墨','白展之师','弟子被斩，遣人追杀。',1)]},
+ {arc:1,minor:true,title:'即墨追杀',short:'即墨追杀',map:'teng',realm:1,env:'city',shot:3,mood:'tense',accent:'#ff8a6a',kw:'追',src:'动画正片 · EP5',
+  lines:['白展一事，王林与即墨老人结下仇怨。','即墨老人托藤家出手，他被迫逃入藤家城。'],
+  chars:[C('即墨老人','墨','白展之师','托藤家出手追杀。',1)]},
  {arc:1,minor:true,title:'夺基斩厉',short:'夺基',map:'teng',realm:2,realmNote:'凝气 → 筑基',env:'city',shot:1,mood:'tense',accent:'#ff7a6a',kw:'夺',src:'动画正片 · EP5–6',
   lines:['藤家少主藤厉看中他身上的异宝，一路追杀。','他以夺基大法反杀藤厉，踏入筑基。'],
   chars:[C('藤厉','厉','藤家少主','藤化元玄孙，觊觎异宝。',1),C('司徒南','南','珠中残魂','传授夺基大法。')]},
@@ -307,7 +352,7 @@ const NODES=[
  {arc:2,minor:true,title:'八极之约',short:'八极之约',map:'xiumo',place:'七梅城',realm:2,env:'sea',shot:3,mood:'mystic',accent:'#6ad8d0',kw:'约',src:'动画正片 · EP25–26',
   lines:['化神大能端木极找上王林，谈成一桩交易。','二人同赴古神之地，抢夺上古机缘。'],
   chars:[C('端木极','极','七梅城主','号八极魔君，化神大能。')]},
- {arc:2,minor:true,title:'第三关',short:'第三关',map:'gushen',realm:2,env:'ancient',shot:2,mood:'mystic',accent:'#e0b050',kw:'魂',src:'动画正片 · 约EP31–36',
+ {arc:2,minor:true,title:'第三关',short:'第三关',map:'gushen',realm:2,env:'ancient',shot:2,mood:'mystic',accent:'#e0b050',kw:'魂',src:'动画正片 · EP32–33',
   lines:['古神之地第三关，游魂遍布，如寂灭之界。','唯有神识能克游魂，端木极只得倚仗他。'],
   chars:[C('端木极','极','七梅城主','闯关须借王林神识。')]},
  {arc:2,title:'古神之地',short:'古神之地',map:'gushen',realm:3,env:'ancient',mood:'epic',accent:'#e8b84a',kw:'神',src:'动画正片',
@@ -316,19 +361,19 @@ const NODES=[
  {arc:2,minor:true,title:'孤身生还',short:'孤身生还',map:'gushen',realm:3,env:'ancient',shot:3,mood:'sad',accent:'#e8b84a',kw:'还',src:'动画正片 · EP37',
   lines:['端木极、古帝等人，尽数殒命古神之地。','唯有王林活着走出，身负古神传承。'],
   chars:[C('端木极','极','七梅城主','殒命古神之地。')]},
- {arc:2,minor:true,title:'分身重逢',short:'分身重逢',map:'yuntian',realm:3,env:'cloud',shot:3,mood:'warm',accent:'#9ee4ea',kw:'逢',src:'动画正片（存疑）',
-  lines:['他炼成第一具分身，坐镇云天宗。','在那里，他与已成长老的李慕婉重逢。'],
-  chars:[C('李慕婉','婉','云天宗长老','与王林重逢。')]},
+ {arc:2,minor:true,title:'分身重逢',short:'分身重逢',map:'yuntian',realm:3,env:'cloud',shot:3,mood:'warm',accent:'#9ee4ea',kw:'逢',src:'动画正片 · EP39',
+  lines:['他炼出分身，以凝气修为拜入云天宗。','李慕婉起初没认出他，几番试探才得相认。'],
+  chars:[C('李慕婉','婉','云天宗','几番试探，认出王林。')]},
  {arc:2,title:'丹炉破婴',short:'元婴',map:'yuntian',realm:4,env:'cloud',mood:'warm',accent:'#8fe0e8',kw:'婴',src:'动画正片',
   lines:['云天宗，李慕婉与孙镇伟的双修大典。','丹炉碎裂，王林破炉而出，元婴已成，天地生异象。','这一次，他没有再转身离开。'],
   chars:[C('李慕婉','婉','云天宗 · 牵挂','情定于此，贯穿王林此后一生。'),C('孙镇伟','伟','双修大典的另一方','大典之日，王林破炉而出。')]},
  {arc:3,title:'血洗藤家',short:'血洗藤家',map:'teng',realm:4,foe:{n:'藤化元',r:4},env:'city',mood:'epic',accent:'#ff5a5a',kw:'杀',src:'动画正片',
   lines:['重回赵国，他先到父母坟前跪拜。','然后以雷霆之势杀入藤家。','百年仇怨，一朝了结。藤化元伏诛。'],
   chars:[C('藤化元','藤','仇 · 伏诛','百年血仇，就此了结。',1)]},
- {arc:3,title:'化凡',short:'化凡',map:'zhuque',realm:4,realmNote:'元婴 · 化凡',env:'dusk',mood:'sad',accent:'#d9b27a',kw:'尘',src:'动画正片 · 约EP53',
+ {arc:3,title:'化凡',short:'化凡',map:'zhuque',realm:4,realmNote:'元婴 · 化凡',env:'dusk',mood:'sad',accent:'#d9b27a',kw:'尘',src:'动画正片 · EP53',
   lines:['放下神通，以凡人之身走进人间。','凡间四百载，杀气凝作一颗煞气之珠。','雕成白云宗化神像，悟透绝情与安逸。'],
   chars:[C('云雀子','雀','仙遗族二祖','问鼎中期强者，与王林同行。'),C('凡人众生','凡','人间','生老病死，一念悲喜。')]},
- {arc:3,minor:true,title:'云雀踢宗',short:'云雀踢宗',map:'baiyun',realm:4,env:'sect',shot:3,mood:'tense',accent:'#8fd8c8',kw:'宗',src:'动画正片 · 约EP54–57',
+ {arc:3,minor:true,title:'云雀踢宗',short:'云雀踢宗',map:'baiyun',realm:4,env:'sect',shot:3,mood:'tense',accent:'#8fd8c8',kw:'宗',src:'动画正片 · EP55',
   lines:['云雀子放出癫狂意境，与他同赴白云宗。','护宗大阵被破，惹出白云宗五大化神。'],
   chars:[C('云雀子','雀','仙遗族二祖','以癫狂意境破护宗大阵。'),C('白云宗五大化神','宗','护宗强者','被云雀子引出。',1)]},
  {arc:3,title:'元神化神',short:'化神',map:'zhuque',realm:5,env:'twin',mood:'epic',accent:'#b69cff',kw:'化',src:'动画正片',
@@ -338,24 +383,21 @@ const NODES=[
   foe:{n:'永夜魔城魔尊',r:-1},
   lines:['古神之地后，修魔内海的永夜魔城骤然崛起。','云天宗遇袭，李慕婉身中剧毒。王林携她再入修魔海。','化神初期，独战三大城主，夺回解药。','化神之力与古神之躯首次融合，二人联手诛灭魔尊。'],
   chars:[C('李慕婉','婉','云天宗遇袭','护宗之战中身中剧毒。'),C('三大城主','城','永夜魔城','被王林以化神初期之身独战。',1),C('魔尊','魔','幕后之人','布下千年阴谋，终被诛灭。',1)]},
- {arc:4,title:'闭关婴变',short:'婴变',map:'zhuque',realm:6,env:'phoenix',mood:'epic',accent:'#ff8a4c',kw:'变',src:'动画正片 · 约EP95',
-  lines:['仙遗族破除封印，朱雀国风云骤变。','他闭关冲击，婴变功成。','朱雀星最强者朱雀子，与仙遗族一战身受重伤。'],
-  chars:[C('朱雀子','雀','朱雀星最强者','与仙遗族大战，身受重伤。'),C('云雀子','云','仙遗族二祖','志在打破仙遗封印。')]},
- {arc:4,minor:true,title:'朱雀墓局',short:'朱雀墓',map:'zhuquemu',realm:6,env:'tomb',mood:'tense',accent:'#ff9a50',kw:'墓',src:'动画正片 · 约EP96–101',
-  lines:['朱雀子重伤，以修星之晶为饵开墓设局。','朱雀星所有婴变修士，皆入墓相争。'],
-  chars:[C('朱雀子','雀','朱雀星最强者','重伤之下开墓设局。',1)]},
- {arc:4,minor:true,title:'泪斩红蝶',short:'泪斩红蝶',map:'zhuquemu',realm:6,env:'tomb',shot:2,mood:'sad',accent:'#ff7a6a',kw:'泪',src:'动画正片 · 约EP100',
-  lines:['朱雀墓中，王林含泪斩下红蝶。','墓中杀机，愈发浓重。'],
-  chars:[C('红蝶','蝶','墓中故人','死于王林含泪一斩。')]},
- {arc:4,title:'雨之仙界',short:'雨之仙界',map:'zhuquemu',place:'朱雀墓 · 雨之仙界',realm:6,env:'rain',mood:'tense',accent:'#9cc7d8',kw:'雨',src:'动画正片',
-  lines:['朱雀墓深处，雨之仙界的残片重现。','他夺得射神车，助周佚守护青霜遗体，收服孙泰。','在仙界遗迹里，他第一次触到“仙”的边缘。'],
-  chars:[C('周佚','佚','友','守护青霜遗体。'),C('孙泰','泰','收服','为王林所用。')]},
- {arc:4,minor:true,title:'千年守尸',short:'千年守尸',map:'zhuquemu',realm:6,env:'rain',shot:3,mood:'calm',accent:'#a8d0e0',kw:'守',src:'动画正片（存疑）',
-  lines:['他与刚刚问鼎的周佚，一同守护青霜遗体。','千年之后，周佚以宝塔与问鼎之晶相赠。'],
-  chars:[C('周佚','佚','问鼎修士','赠他宝塔与问鼎之晶。')]},
- {arc:5,title:'星海天运',short:'离开朱雀星',map:'lianmeng',realm:6,env:'star',mood:'cosmic',accent:'#7fc8ff',kw:'运',src:'动画正片 · 约EP102',
-  lines:['联盟使者墨智现身，夺晶之争就此落幕。','取回命魂，他随司徒南离开朱雀星。','踏入浩瀚星域，天运子成了他绕不开的命数。'],
-  chars:[C('墨智','墨','修真联盟使者','现身终结夺晶之争。'),C('司徒南','南','同行前辈','带他离开朱雀星。'),C('天运子','运','命中宿敌','天运星之主。',1)]},
+ {arc:4,title:'雨之仙界',short:'雨之仙界',map:'zhuque',place:'雨之仙界',realm:5,env:'rain',mood:'tense',accent:'#9cc7d8',kw:'雨',src:'动画正片 · EP64–74',
+  lines:['凭一座雨鼎，他踏进雨之仙界的遗迹。','天宝上人洞府中，他夺得三辆射神车。','周佚燃魂问鼎，把婷儿仙尸与问鼎之晶托付给他。','在仙界遗迹里，他第一次触到“仙”的边缘。'],
+  chars:[C('周佚','佚','问鼎修士','燃魂问鼎，托付婷儿仙尸。'),C('孙泰','泰','仙界遗修','被种下奴印，认王林为主。')]},
+ {arc:4,title:'闭关婴变',short:'婴变',map:'zhuque',realm:6,env:'phoenix',mood:'epic',accent:'#ff8a4c',kw:'变',src:'动画正片 · EP95',
+  lines:['仙遗族的图谋浮出水面，朱雀国风云骤变。','他闭关冲击，婴变功成。','司徒南苏醒，一身威压震慑朱雀子。'],
+  chars:[C('司徒南','南','珠中残魂','苏醒后震慑朱雀子。'),C('云雀子','云','仙遗族二祖','志在打破仙遗封印。')]},
+ {arc:4,minor:true,title:'朱雀墓局',short:'朱雀墓',map:'zhuquemu',realm:6,env:'tomb',mood:'tense',accent:'#ff9a50',kw:'墓',src:'动画正片 · EP98–101',
+  lines:['朱雀子捏碎修星之心，朱雀墓随之开启。','朱雀星的婴变修士，皆入墓争夺修星之晶。'],
+  chars:[C('朱雀子','雀','朱雀星最强者','以修星之晶为饵开墓。',1)]},
+ {arc:4,minor:true,title:'红蝶之死',short:'红蝶之死',map:'zhuquemu',realm:6,env:'tomb',shot:2,mood:'sad',accent:'#ff7a6a',kw:'蝶',src:'动画正片 · EP100',
+  lines:['被乾风炼作炉鼎的红蝶短暂清醒，求他一死。','他以古魔战斧送她解脱，墓中杀机愈浓。'],
+  chars:[C('红蝶','蝶','墓中故人','临终托他杀乾风。'),C('乾风','乾','婴变修士','将红蝶炼作炉鼎。',1)]},
+ {arc:5,title:'星海天运',short:'离开朱雀星',map:'lianmeng',realm:6,env:'star',mood:'cosmic',accent:'#7fc8ff',kw:'运',src:'动画正片 · EP101–102',
+  lines:['朱雀墓一役落幕，他婉拒了朱雀之位。','乘星罗盘，随司徒南离开朱雀星。','初到天运星，浩瀚星域就此展开。'],
+  chars:[C('司徒南','南','同行前辈','带他离开朱雀星。'),C('天运子','运','命中宿敌','天运星之主。',1)]},
  {arc:5,title:'婉儿长眠',short:'婉儿长眠',map:'lianmeng',realm:6,env:'sleep',mood:'sad',accent:'#bcd4ee',kw:'眠',src:'动画正片',
   lines:['与天相争之际，李慕婉寿元将尽，陷入长眠。','他把她的魂魄小心收起，护在身侧。','从这一刻起，他修行只为一件事：逆天，唤她醒来。'],
   chars:[C('李慕婉','婉','长眠','王林此后一切修行的理由。')]},
@@ -365,9 +407,9 @@ const NODES=[
  {arc:6,title:'雷之仙界',short:'雷之仙界',map:'leixian',realm:7,realmNote:'问鼎大圆满',env:'thunder',mood:'tense',accent:'#a99cff',kw:'雷',src:'动画正片',
   lines:['雷之仙界，与李元义结金兰。','周旋于张氏家族之间，将雷道子炼为傀儡。','问鼎大圆满，离下一境只差一线。'],
   chars:[C('李元','元','结拜兄弟','以命相交的生死之交。'),C('雷道子','雷','被炼为傀儡','成了王林手中的一张底牌。',1),C('张氏家族','张','雷之仙界势力','王林周旋其间。')]},
- {arc:6,minor:true,title:'仙人禁山',short:'仙人禁山',map:'leixian',realm:7,env:'thunder',shot:3,mood:'mystic',accent:'#b0a4ff',kw:'山',src:'动画正片（存疑）',
-  lines:['他随李元闯入仙人禁山，得古神皮甲。','仙界崩溃之谜，在此露出一角。'],
-  chars:[C('李元','元','结拜兄弟','同闯禁山，初窥崩界之谜。')]},
+ {arc:6,minor:true,title:'仙人禁山',short:'仙人禁山',map:'leixian',realm:7,env:'thunder',shot:3,mood:'mystic',accent:'#b0a4ff',kw:'山',src:'动画正片 · EP150–151',
+  lines:['他随李元登上仙人禁山，破解上古奴印。','远古仙人发疯的真相，在此露出一角。'],
+  chars:[C('李元','元','结拜兄弟','识海中的仙人奴印被王林化解。')]},
  {arc:6,title:'弑仙之战',short:'弑仙之战',map:'leixian',realm:9,fromRealm:7,realmNote:'问鼎 → 阳实',film:'2026.10.01',env:'slay',mood:'thunder',accent:'#ffe27a',kw:'弑',src:'剧场版',
   foe:{n:'血祖',r:11},
   lines:['为救女儿姚惜雪，血祖跨星域而来，布下天罗地网。','问鼎对净涅，境界之差如同天堑。','迷阵与琉璃空间之中，王林与李元步步设局。','越级反杀，以弱弑仙。此战跳过阴虚，破境阳实。'],
@@ -378,12 +420,12 @@ const NODES=[
  {arc:6,title:'阴仙府',short:'阴仙府',map:'yinxian',realm:9,env:'cave',mood:'mystic',accent:'#b781ff',kw:'魔',src:'动画正片 · EP152–153',
   lines:['与李元同探阴仙府暗洞，误解封印。','清水仙君的杀戮魔念，就此苏醒。','死里逃生，他独闯藏品阁。'],
   chars:[C('李元','元','结拜兄弟','与王林同探暗洞。'),C('清水仙君','清','杀戮魔念','封印中的右眼魔念苏醒。',1)]},
- {arc:6,minor:true,title:'九层藏品阁',short:'藏品阁',map:'yinxian',realm:9,env:'cave',shot:1,mood:'tense',accent:'#c09aff',kw:'阁',src:'动画正片 · 约EP153–154',
+ {arc:6,minor:true,title:'九层藏品阁',short:'藏品阁',map:'yinxian',realm:9,env:'cave',shot:1,mood:'tense',accent:'#c09aff',kw:'阁',src:'动画正片 · EP153–154',
   lines:['四名阳实守卫，先后倒在他手下。','借青霜遗体通过仙缘检测，直上九层。','白凡仙帝留下的仙术，终入他手。'],
   chars:[C('青霜仙君','霜','已故仙君','遗体成了通关之钥。'),C('白凡仙帝','凡','雷之仙界仙帝','在第九层留下遗术。')]},
- {arc:6,minor:true,title:'画中溯世',short:'画中溯世',map:'yinxian',realm:9,env:'scroll',mood:'mystic',accent:'#ffd890',kw:'画',src:'动画正片 · 约EP154',
-  lines:['古画展开，雷之仙界的鼎盛时代重现。','年轻的清水仙君，隔着时空与他对视。'],
-  chars:[C('清水仙君','清','极境仙君','跨越时空与王林相见。',1)]},
+ {arc:6,minor:true,title:'古画悟道',short:'古画悟道',map:'yinxian',realm:9,env:'scroll',mood:'mystic',accent:'#ffd890',kw:'画',src:'动画正片 · EP154',
+  lines:['古画展开，白凡仙帝的虚影现身。','他在画中悟道，习得呼风仙术。'],
+  chars:[C('白凡仙帝','凡','雷之仙界仙帝','以画中虚影传下仙术。')]},
  {arc:6,minor:true,title:'逃离雷界',short:'逃离雷界',map:'leixian',realm:9,env:'thunder',shot:3,mood:'thunder',accent:'#a99cff',kw:'逃',src:'动画正片 · EP157 · 动画最新进度',
   lines:['仙门已毁，雷之仙界将倾，生路只剩一线。','清水仙君恢复记忆追杀而来，他终逃出雷之仙界。'],
   chars:[C('清水仙君','清','白发追杀者','恢复记忆，与王林恶战。',1),C('炎雷子','炎','雷界强者','助王林脱身。')]},
@@ -465,7 +507,7 @@ const GL=(()=>{
   let renderer;
   try{renderer=new T3.WebGLRenderer({antialias:!LOW,powerPreference:'high-performance'})}catch(e){return null}
   if(!renderer||!renderer.getContext())return null;
-  let PR=Math.min(window.devicePixelRatio||1,LOW?1.25:1.5);
+  let PR=Math.min(window.devicePixelRatio||1,REC&&innerWidth<innerHeight?3:LOW?1.25:1.5);
   renderer.setPixelRatio(PR);renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0x000000,1);
   $('#stage').appendChild(renderer.domElement);
   renderer.domElement.setAttribute('aria-hidden','true');
@@ -984,7 +1026,7 @@ const Timeline={
       <div class="txt">${lines}</div>
       <div class="slate ln" ${d(.9+L*1.05)}>${slate}</div>
       ${c.end?`<button type="button" class="again ln" ${d(1.4+L*1.05)} id="again">↻　重温</button>`:''}`;
-    content.appendChild(p);
+    content.appendChild(p);fitPanel(p);
     const ag=p.querySelector('#again');if(ag)ag.onclick=()=>{this.auto=true;this.go(0);Music.resume()};
     cards.innerHTML='<div class="cards-h">关键人物</div>'+c.chars.map((h,n)=>`<div class="card${h.enemy?' enemy':''}" style="--d:${(D0+(.5+n*.3)/SPEED).toFixed(2)}s"><div class="seal">${h.g}</div><div><div class="n">${h.n}</div><div class="r">${h.r}</div><div class="d">${h.d}</div></div></div>`).join('');
     NODES.forEach((cc,k)=>{cc.node.classList.toggle('cur',k===i);cc.node.classList.toggle('seen',k<=i)});
