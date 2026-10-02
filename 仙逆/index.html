@@ -7,7 +7,7 @@
 <title>仙逆剧情长卷</title>
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-/* Layout: letterboxed 3D cinema stage. Left = realm rail, centre-left = story, right = people cards + map, bottom bar = labelled timeline. Single dark look by design. */
+/* Layout: full-bleed 3D stage, top/bottom bars float over it as gradients. Left = realm rail, centre-left = story, right = people cards + map, bottom bar = labelled timeline. Single dark look by design. */
 :root{
   color-scheme:dark;
   --accent:#f0b46a; --gold:#e6c470; --blood:#ff5a4a; --novel:#bcd0ff; --ink:#05060a; --fg:#f3ece0; --fg2:rgba(243,236,224,.66); --fg3:rgba(243,236,224,.38);
@@ -28,17 +28,18 @@ button:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 #fade{position:absolute;inset:0;pointer-events:none;opacity:0;background:#000}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;mix-blend-mode:screen}
 
-/* letterbox */
-.bar{position:absolute;left:0;right:0;background:#000;z-index:20}
-.bar.top{top:0;height:calc(var(--bt) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) clamp(14px,3vw,44px) 0;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.04)}
-.bar.bottom{bottom:0;height:calc(var(--bb) + env(safe-area-inset-bottom,0px));padding:10px clamp(12px,3vw,44px) calc(8px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;justify-content:space-between;border-top:1px solid rgba(255,255,255,.05)}
-.logo{display:flex;align-items:baseline;gap:12px;white-space:nowrap;min-width:0}
+/* 顶栏、底栏：渐变叠在画面上，不留黑边 */
+.bar{position:absolute;left:0;right:0;z-index:20}
+.bar.top{top:0;height:calc(var(--bt) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) clamp(14px,3vw,44px) 0;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(180deg,rgba(0,0,0,.62),rgba(0,0,0,0))}
+.bar.bottom{bottom:0;height:calc(var(--bb) + env(safe-area-inset-bottom,0px));padding:10px clamp(12px,3vw,44px) calc(8px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(0deg,rgba(0,0,0,.85),rgba(0,0,0,.5) 60%,rgba(0,0,0,0));text-shadow:0 1px 8px rgba(0,0,0,.8)}
+.logo{display:flex;align-items:baseline;gap:12px;white-space:nowrap;min-width:0;text-shadow:0 1px 12px rgba(0,0,0,.7)}
 .logo b{font-family:var(--brush);font-weight:400;font-size:clamp(22px,3.2vh,34px);letter-spacing:.2em}
 .logo span{font-size:11px;letter-spacing:.38em;color:var(--fg2)}
 .ctl{display:flex;gap:6px;align-items:center}
-.ibtn{height:34px;min-width:34px;padding:0 12px;border:1px solid rgba(255,255,255,.14);border-radius:17px;font-size:12px;letter-spacing:.08em;color:var(--fg2);transition:.25s;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.ibtn{height:34px;min-width:34px;padding:0 12px;border:1px solid rgba(255,255,255,.14);border-radius:17px;font-size:12px;letter-spacing:.08em;color:var(--fg2);background:rgba(0,0,0,.28);transition:.25s;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
 .ibtn:hover{color:#fff;border-color:var(--accent);box-shadow:0 0 14px -2px var(--accent)}
 .ibtn.on{color:#fff;border-color:var(--accent)}
+a.ibtn{text-decoration:none}
 .row1{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .pl{display:flex;align-items:center;gap:6px}
 .pl .ibtn{width:34px;padding:0}
@@ -184,10 +185,19 @@ h1.ti.long{font-size:clamp(40px,6.2vw,96px)}
   .card .d,.card .r{display:none}
   .seal{width:32px;height:32px;font-size:18px}
   .card .n{font-size:13px;align-self:center}
-  .map,.rail,.bigch{display:none}
+  .map,.bigch{display:none}
   .scrim{background:linear-gradient(0deg,rgba(0,0,0,.8),rgba(0,0,0,.25) 60%,transparent)}
   .ibtn{padding:0 9px}
   #toast{left:50%}
+  /* 保留左侧境界栏，缩小显示 */
+  .rail{left:6px;top:calc(var(--bt) + 6px);bottom:calc(var(--bb) + 66px)}
+  .rl{height:12px;gap:5px;font-size:8.5px;letter-spacing:.06em}
+  .rl::before{width:5px}
+  .rl.got::before{width:8px}
+  .rl.cur{font-size:11px}
+  .rl.cur::before{width:12px;height:2px}
+  .rl.foe::after{font-size:7.5px;line-height:10px;padding:0 2px}
+  #content{left:62px}
 }
 @media(prefers-reduced-motion:reduce){.ln,.card,.ping{animation-duration:.01s!important;animation-delay:0s!important}}
 </style>
@@ -212,6 +222,7 @@ h1.ti.long{font-size:clamp(40px,6.2vw,96px)}
   <header class="bar top">
     <div class="logo"><b>仙逆</b><span>剧情长卷 · 动画 · 剧场版 · 原著</span></div>
     <div class="ctl">
+      <a class="ibtn" id="bHome" href="../">‹ 海报墙</a>
       <button class="ibtn on" id="bMusic" type="button">♪ 配乐</button>
       <button class="ibtn" id="bFull" type="button" aria-label="全屏">⛶</button>
     </div>
@@ -890,7 +901,7 @@ const Music=(()=>{
     droneG.gain.setTargetAtTime(mood.dr*.1,t,1.5);rumbleG.gain.setTargetAtTime(mood.rum,t,1.2)}
   function applyVol(){const want=on&&playing&&!hidden;if(ctx){if(want&&ctx.state==='suspended')ctx.resume();master.gain.setTargetAtTime(want?.8:0,ctx.currentTime,want?.5:.12);clearTimeout(susT);if(!want)susT=setTimeout(()=>{if(!(on&&playing&&!hidden)&&ctx.state==='running')ctx.suspend()},700)}const b=$('#bMusic');b.textContent=on?'♪ 配乐':'♪ 静音';b.classList.toggle('on',on)}
   function start(){if(started)return true;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;started=true;
-    ctx=new AC();master=ctx.createGain();master.gain.value=0;const comp=ctx.createDynamicsCompressor();master.connect(comp);comp.connect(ctx.destination);
+    ctx=(()=>{try{if(window.parent!==window&&window.parent.__xnCtx)return window.parent.__xnCtx}catch(e){}return null})()||new AC();master=ctx.createGain();master.gain.value=0;const comp=ctx.createDynamicsCompressor();master.connect(comp);comp.connect(ctx.destination);
     const sr=ctx.sampleRate,len=sr*3.4,ir=ctx.createBuffer(2,len,sr);for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
     const cv=ctx.createConvolver();cv.buffer=ir;verbSend=ctx.createGain();verbSend.gain.value=.7;verbSend.connect(cv);cv.connect(master);
     noiseBuf=ctx.createBuffer(1,sr*2,sr);{const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
@@ -939,7 +950,7 @@ function showToast(c){const el=$('#toast');el.querySelector('b').textContent=R[c
   const re=rail.querySelector(`.rl[data-i="${c.realm}"]`);if(re){re.classList.remove('pulse');void re.offsetWidth;re.classList.add('pulse')}}
 const Timeline={
   idx:-1,auto:false,t0:0,pausedAt:0,
-  dwell(c){return c.end?9e9:(5.4+c.lines.length*3.1+(c.film||c.prologue?3:0))*1000/SPEED},
+  dwell(c){return c.end?9e9:this.hold},
   go(i){
     i=Math.max(0,Math.min(N-1,i));if(i===this.idx)return;
     const prev=this.idx>=0?NODES[this.idx]:null,c=NODES[i],fwd=i>this.idx;
@@ -954,6 +965,8 @@ const Timeline={
     content.querySelectorAll('.panel').forEach(p=>{p.classList.add('out');setTimeout(()=>p.remove(),750)});
     const p=document.createElement('div');p.className='panel';
     const D0=c.prologue?3:instant?.2:(c.film?3.2:1.25/SPEED),d=n=>`style="--d:${(D0+n/SPEED).toFixed(2)}s"`,L=c.lines.length;
+    // 最后出现的是出处一栏（动画 1 秒），全部出现后再停 3 秒
+    this.hold=(D0+(.9+L*1.05)/SPEED+1+3)*1000;
     const lines=c.lines.map((l,k)=>`<p class="ln" ${d(.9+k*1.05)}>${l}</p>`).join('');
     let slate=`<span>出处<b>${c.src}</b></span>`;
     if(c.film)slate=`<span>${c.tbd?'状态':'上线'}<b>${c.film}</b></span>`+slate;
@@ -1006,6 +1019,7 @@ $('#bNext').onclick=()=>{Timeline.next();Music.resume()};
 $('#bPlay').onclick=()=>{const c=NODES[Timeline.idx];Music.resume();if(c.end){Timeline.auto=true;Timeline.go(0)}else Timeline.toggle()};
 $('#bMusic').onclick=()=>{Music.start();Music.resume();Music.toggle()};
 $('#bFull').onclick=fs;
+$('#bHome').onclick=e=>{if(window.parent!==window){e.preventDefault();try{window.parent.history.back()}catch(_){location.href='../'}}};
 function fs(){try{if(document.fullscreenElement)document.exitFullscreen();else{const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(!r)note2('当前环境不支持全屏');else r.catch(()=>note2('当前环境不支持全屏'))}}catch(e){note2('当前环境不支持全屏')}}
 addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key==='PageDown')Timeline.next();

@@ -47,6 +47,9 @@ a.poster:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
 .poster.soon .art,.poster.soon .t,.poster.soon .info{filter:grayscale(1);opacity:.45}
 .poster .badge{position:absolute;top:16px;left:14px;z-index:2;padding:4px 11px;border:1px solid rgba(255,255,255,.32);border-radius:99px;font-size:11px;letter-spacing:.3em;color:var(--fg2);background:rgba(0,0,0,.45)}
 footer{font-size:11px;line-height:1.9;letter-spacing:.2em;color:var(--fg3);text-align:center}
+iframe.work{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:100;background:#000;opacity:0;transition:opacity .6s ease}
+iframe.work.on{opacity:1}
+body.in-work{overflow:hidden}
 @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @media (max-width:520px){.wall{grid-template-columns:repeat(2,minmax(0,1fr))}.poster .info{left:12px;right:12px;bottom:12px}.poster .tags{font-size:10.5px;letter-spacing:.02em}.poster .tags .sub{display:none}.poster .go{padding:5px 12px}}
 @media (prefers-reduced-motion:reduce){header,.poster{animation:none}.poster,.poster .art{transition:none}}
@@ -103,6 +106,20 @@ footer{font-size:11px;line-height:1.9;letter-spacing:.2em;color:var(--fg3);text-
     for(let i=0;i<n;i++){const x=r()*w,y=r()*h,s=r()*1.3+.2,a=.15+r()*.55;g.fillStyle=`rgba(235,240,255,${a})`;g.fillRect(x,y,s,s)}
   }
   draw();let t;addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(draw,150)});
+  // 手机浏览器不会把上一页的点击算给新页面，所以在点海报的这一下解锁声音，再在本页打开作品
+  function unlock(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    try{if(!window.__xnCtx)window.__xnCtx=new AC();const c=window.__xnCtx;if(c.resume)c.resume();
+      const b=c.createBuffer(1,1,22050),src=c.createBufferSource();src.buffer=b;src.connect(c.destination);src.start(0)}catch(e){}}
+  const T0=document.title;
+  function show(url){const f=document.createElement('iframe');f.className='work';f.src=url;f.allow='autoplay; fullscreen';f.allowFullscreen=true;f.title='剧情长卷';
+    f.onload=()=>{try{document.title=f.contentDocument.title}catch(e){}};
+    document.body.appendChild(f);document.body.classList.add('in-work');requestAnimationFrame(()=>f.classList.add('on'))}
+  function open(href){unlock();const url=new URL(href,location.href).href;show(url);history.pushState({work:url},'',url)}
+  function close(){const f=document.querySelector('iframe.work');if(f)f.remove();document.body.classList.remove('in-work');document.title=T0;
+    if(window.__xnCtx){try{window.__xnCtx.close()}catch(e){}window.__xnCtx=null}}
+  document.querySelectorAll('a.poster').forEach(a=>a.addEventListener('click',e=>{if(e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();open(a.getAttribute('href'))}));
+  // 后退关掉作品；前进再打开（这时没有点击，进去后需要轻触一下才有声音）
+  addEventListener('popstate',e=>{const url=e.state&&e.state.work,f=document.querySelector('iframe.work');if(url&&!f)show(url);else if(!url&&f)close()});
 })();
 </script>
 </body>
